@@ -1,0 +1,19 @@
+Package: rowmatcher
+Title: Matching cases between linelists
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Finlay",
+           family = "Campbell",
+           role = c("aut", "cre"),
+           email = "finlaycampbell93@gmail.com")
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Depends:
+    R (>= 3.0.0)
+Imports:
+    pbapply,
+    stringdist,
+    openxlsx
+Encoding: UTF-8
+LazyData: false
+RoxygenNote: 7.1.0
