@@ -45,8 +45,8 @@
 ## check than columns classes match
 .assert_col_class <- function(x, y, col_match) {
 
-  class_1 <- vapply(x[,col_match[,1], drop = FALSE], class, "")
-  class_2 <- vapply(y[,col_match[,2], drop = FALSE], class, "")
+  class_1 <- lapply(x[,col_match[,1], drop = FALSE], class, "")
+  class_2 <- lapply(y[,col_match[,2], drop = FALSE], class, "")
 
   class_1[class_1 == 'integer'] <- 'numeric'
   class_2[class_2 == 'integer'] <- 'numeric'
@@ -80,11 +80,11 @@
 
 ## generate matching functions with dist value embedded
 .create_score_fun <- function(class) {
-  if(class == "character") {
+  if(class %in% c("character", "factor")) {
     return(function(a, b) stringdist::stringdist(a, b))
   } else if(class == "numeric") {
     return(function(a, b) -abs(a - b))
-  } else if(class == "Date") {
+  } else if(class %in% c("Date", "POSIXct", "POSIXlt", "POSIXt")) {
     return(function(a, b) - abs(as.numeric(a - b)))
   } else {
     stop("column class must be numeric, Date or character")

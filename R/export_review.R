@@ -34,13 +34,20 @@ export_review <- function(matches,
   matches <- split(matches, matches$index_x)
 
   ## order by best score
-  matches <- matches[order(vapply(matches, function(x) max(x$match_score, na.rm = TRUE), 1.0),
-                           decreasing = TRUE)]
+  matches <- matches[
+    order(
+      vapply(matches, function(x) max(x$match_score, na.rm = TRUE), 1.0),
+      decreasing = TRUE)
+  ]
 
   ## extract top_n results per case and append empty row
   matches <- lapply(
     matches,
-    function(x) rbind(empty_row, x[order(x$match_score, decreasing = TRUE)[seq_len(min(nrow(x), top_n))],])
+    function(x)
+      rbind(
+        empty_row,
+        x[order(x$match_score, decreasing = TRUE)[seq_len(min(nrow(x), top_n))],]
+      )
   )
   matches <- do.call(rbind, matches)
   rownames(matches) <- NULL

@@ -30,12 +30,19 @@
 #'   scores. NA handling can also be specified in a variable-specific manner by
 #'   providing custom scoring functions to \code{score_fun}.
 #'
-#' @param output If "index", returns a dataframe of matched indices between the
-#'   linelists. If "merged", returns a merged linelist. If "review", returns a
-#'   dataframe for manual reviewing of matches.
+#' @param output If "scores", returns a dataframe of matched scores. If
+#'   "merged", returns a merged linelist using the matched indices. If "review",
+#'   returns a dataframe for manual reviewing of matches.
 #'
-#' @return A dataframe of matching indices if output = "index", a merged
-#'   linelist if output = "merged".
+#' @param top_n An optional integer indicating the number of matches to keep per
+#'   per row of the \code{x} dataframe, sorted by match score.
+#'
+#' @param min_score An optional numeric indicating the minimum match score
+#'   required to keep a match.
+#'
+#' @return Depending on the value of \code{output}, a dataframe containing
+#'   either the matching scores, a merged database or the matches for manual
+#'   review.
 #'
 #' @importFrom pbapply pbmapply
 #'
@@ -53,19 +60,22 @@
 #'              ncol = 2, byrow = TRUE)
 #'
 #' ## find matching case indices
-#' matches <- match_rows(linelist_a, linelist_b, by)
+#' matches <- match_rows(
+#' sample_linelists$linelist_a,
+#' sample_linelists$linelist_b,
+#' by
+#' )
 #' head(matches)
 #'
 match_rows <- function(x, y, by,
                        score_fun = NULL,
                        rescale = TRUE,
                        na_score = 0,
-                       filter = c("none", "best", "min_score"),
-                       output = c("index", "merged", "review"),
+                       output = c("scores", "merged", "review"),
+                       top_n = NULL,
                        min_score = NULL) {
 
   ## match args
-  filter <- match.arg(filter)
   output <- match.arg(output)
 
   ## check by
@@ -95,7 +105,8 @@ match_rows <- function(x, y, by,
     function(a, b, f, raw) if(raw) f(a, b) else outer(a, b, f),
     as.list(x[by[,1]]),
     as.list(y[by[,2]]),
-    f_list, raw
+    f_list,
+    raw
   )
 
   ## insert NA scores
@@ -114,15 +125,18 @@ match_rows <- function(x, y, by,
     scores
   )
 
-  ## filter rows if required
-  if(filter == "best") {
+  ## keep top_n matches per x index
+  if(!is.null(top_n)) {
+    n <- min(top_n, nrow(y))
     out <- lapply(
       split(out, out$index_x),
-      function(x) x[order(x$match_score, decreasing = TRUE)[1],]
+      function(x) x[order(x$match_score, decreasing = TRUE)[seq_len(n)],]
     )
     out <- do.call(rbind, out)
-  } else if(filter == "min_score") {
-    if(is.null(min_score)) stop("min_score must be provided")
+  }
+
+  ## keep scores above or equal to min_score
+  if(!is.null(min_score)) {
     out <- out[out$match_score >= min_score,]
   }
 
@@ -132,13 +146,14 @@ match_rows <- function(x, y, by,
     y$index_y <- seq_len(nrow(y))
     out <- merge(out, x, by = "index_x")
     out <- merge(out, y, by = "index_y")
-    out <- out[with(out, order(index_x, index_y)),]
+    out <- out[order(out$index_x, out$index_y),]
     rownames(out) <- NULL
   }
 
   if(output == "merged") {
     ## remove uncessary columns
-    out[, c("index_x", "index_y", names(out)[grepl("match_score_", names(out))])] <- NULL
+    out[, c("index_x", "index_y",
+            names(out)[grepl("match_score_", names(out))])] <- NULL
   } else if (output == "review") {
     ## re-order columns for review
     out <- out[c("match_score", "index_x", "index_y", as.vector(t(by_names)))]
