@@ -11,8 +11,8 @@ match_rows(
   score_fun = NULL,
   rescale = TRUE,
   na_score = 0,
-  filter = c("none", "best", "min_score"),
-  output = c("index", "merged", "review"),
+  output = c("scores", "merged", "review"),
+  top_n = NULL,
   min_score = NULL
 )
 }
@@ -40,13 +40,20 @@ be rescaled between 0 and 1.}
 scores. NA handling can also be specified in a variable-specific manner by
 providing custom scoring functions to \code{score_fun}.}
 
-\item{output}{If "index", returns a dataframe of matched indices between the
-linelists. If "merged", returns a merged linelist. If "review", returns a
-dataframe for manual reviewing of matches.}
+\item{output}{If "scores", returns a dataframe of matched scores. If
+"merged", returns a merged linelist using the matched indices. If "review",
+returns a dataframe for manual reviewing of matches.}
+
+\item{top_n}{An optional integer indicating the number of matches to keep per
+per row of the \code{x} dataframe, sorted by match score.}
+
+\item{min_score}{An optional numeric indicating the minimum match score
+required to keep a match.}
 }
 \value{
-A dataframe of matching indices if output = "index", a merged
-  linelist if output = "merged".
+Depending on the value of \code{output}, a dataframe containing
+  either the matching scores, a merged database or the matches for manual
+  review.
 }
 \description{
 This function matches cases between linelists on specified columns using
@@ -66,7 +73,11 @@ by <- matrix(c("numeric_a", "numeric_b",
              ncol = 2, byrow = TRUE)
 
 ## find matching case indices
-matches <- match_rows(linelist_a, linelist_b, by)
+matches <- match_rows(
+sample_linelists$linelist_a,
+sample_linelists$linelist_b,
+by
+)
 head(matches)
 
 }
