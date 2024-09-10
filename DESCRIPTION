@@ -16,4 +16,4 @@ Imports:
     openxlsx
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 7.1.0
+RoxygenNote: 7.2.3

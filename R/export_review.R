@@ -61,7 +61,7 @@ export_review <- function(matches,
   ## write xlsx file
   old_format <- getOption("openxlsx.dateFormat")
   options(openxlsx.dateFormat = date_format)
-  write.xlsx(matches, file = file, row.names = FALSE, showNA = FALSE)
+  write.xlsx(matches, file = file, rowNames = FALSE, showNA = FALSE)
   options(openxlsx.dateFormat = old_format)
 
   ## load workbook for cell coloring

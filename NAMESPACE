@@ -2,6 +2,7 @@
 
 export(export_review)
 export(import_review)
+export(match_dictionary)
 export(match_rows)
 export(merge_from_review)
 importFrom(openxlsx,addStyle)
