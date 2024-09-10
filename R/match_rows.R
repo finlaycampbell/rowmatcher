@@ -156,7 +156,13 @@ match_rows <- function(x, y, by,
             names(out)[grepl("match_score_", names(out))])] <- NULL
   } else if (output == "review") {
     ## re-order columns for review
-    out <- out[c("match_score", "index_x", "index_y", as.vector(t(by_names)))]
+    ## catch .x and .y renaming
+    nms <- as.vector(t(by_names))
+    dp <- duplicated(nms)
+    dp_nms <- nms[dp]
+    nms[nms %in% dp_nms & dp] <- paste0(nms[nms %in% dp_nms & dp], ".y")
+    nms[nms %in% dp_nms & !dp] <- paste0(nms[nms %in% dp_nms & !dp], ".x")
+    out <- out[c("match_score", "index_x", "index_y", nms)]
   }
 
   return(out)
