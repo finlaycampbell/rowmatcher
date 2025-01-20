@@ -81,11 +81,11 @@
 ## generate matching functions with dist value embedded
 .create_score_fun <- function(class) {
   if(class %in% c("character", "factor")) {
-    return(function(a, b) stringdist::stringdist(a, b))
+    return(function(a, b) -stringdist::stringdist(a, b))
   } else if(class == "numeric") {
     return(function(a, b) -abs(a - b))
   } else if(class %in% c("Date", "POSIXct", "POSIXlt", "POSIXt")) {
-    return(function(a, b) - abs(as.numeric(a - b)))
+    return(function(a, b) -abs(as.numeric(a - b)))
   } else {
     stop("column class must be numeric, Date or character")
   }
